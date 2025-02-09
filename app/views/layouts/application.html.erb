@@ -23,6 +23,25 @@
   </head>
 
   <body>
+  <header class="header">
+    <div class="container">
+    <h1 class="logo">
+      <%= link_to image_tag("LOGO.png", alt: "Plamo Painter", class: "logo-image"), root_path %>
+    </h1>
+      <nav class="nav-menu">
+        <ul class="nav-links">
+          <li><%= link_to "ログイン" %></li>
+          <li><%= link_to "ログアウト"  %></li>
+          <li><%= link_to "新規登録" %></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main class="main-content">
     <%= yield %>
-  </body>
+  </main>
+
+</body>
 </html>
