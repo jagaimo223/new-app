@@ -30,9 +30,13 @@
     </h1>
       <nav class="nav-menu">
         <ul class="nav-links">
-          <li><%= link_to "ログイン" %></li>
-          <li><%= link_to "ログアウト"  %></li>
-          <li><%= link_to "新規登録" %></li>
+        <% if logged_in? %>
+          <p>こんにちは、<%= current_user.email %> さん！</p>
+          <%= link_to 'ログアウト', logout_path, method: :delete %>
+        <% else %>
+            <%= link_to 'ログイン', login_path %>
+            <%= link_to '新規登録', new_user_path %>
+        <% end %>
         </ul>
       </nav>
     </div>
