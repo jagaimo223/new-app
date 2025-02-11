@@ -66,3 +66,6 @@ group :test do
 end
 ruby "3.2.2"
 ruby "3.2.2"
+
+gem "rspec-rails", "~> 7.1"
+gem 'bundler-audit'
