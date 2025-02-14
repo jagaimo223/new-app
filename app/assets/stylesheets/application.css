@@ -1,4 +1,4 @@
-  .container {
+.container {
     display: flex;
     width: 100%;
     max-width: 1800px;
@@ -181,4 +181,55 @@
   .start-button:hover {
     background: #011581;
   }
-  
+ 
+.form-container {
+  max-width: 500px;
+  margin: 60px auto;
+  padding: 20px;
+  border: 1px solid #cfcfcf;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+}
+
+.form-group input {
+  width: 100%;
+  max-width: 450px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+.btn-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  width: 120px;
+  padding: 10px;
+  color: white;
+  background-color: #3633fff5;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-primary:hover {
+  background-color: #011581;
+} 

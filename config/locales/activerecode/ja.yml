@@ -1,0 +1,32 @@
+ja:
+  activerecord:
+    models:
+      user: ユーザー
+    attributes:
+      user:
+        name: 名前
+        email: メールアドレス
+        password: パスワード
+        password_confirmation: パスワード（確認）
+
+  helpers:
+    submit:
+      create: "作成"
+      submit: "送信"
+      update: "更新"
+
+  views:
+    sessions:
+      new:
+        title: "ログイン"
+        email: "メールアドレス"
+        password: "パスワード"
+        submit: "ログイン"
+        sign_up: "新規登録はこちら"
+
+  errors:
+    messages:
+      invalid: "は無効です"
+      blank: "を入力してください"
+      too_short: "は%{count}文字以上で入力してください"
+      confirmation: "が一致しません"
