@@ -16,6 +16,8 @@ test:
   database: new_app_test
 
 production:
+  adapter: mysql2
+  url: <%= ENV['DATABASE_URL'] %>
   primary: &primary_production
     <<: *default
     database: app_production
