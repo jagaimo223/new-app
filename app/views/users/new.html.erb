@@ -1,24 +1,33 @@
 <h2>新規登録</h2>
 
-<%= form_with model: @user, local: true do |f| %>
-  <div>
-    <%= f.label :email %><br/>
-    <%= f.email_field :email %>
-  </div>
+<div class="form-container">
+  <%= render "shared/error_messages", object: @user %>
 
-  <div>
-    <%= f.label :password %><br/>
-    <%= f.password_field :password %>
-  </div>
+  <%= form_with model: @user, local: true do |f| %>
+    <div class="form-group">
+      <%= f.label :name %>
+      <%= f.text_field :name %>
+    </div>
 
-  <div>
-    <%= f.label :password_confirmation %><br/>
-    <%= f.password_field :password_confirmation %>
-  </div>
+    <div class="form-group">
+      <%= f.label :email %>
+      <%= f.email_field :email %>
+    </div>
 
-  <div>
-    <%= f.submit "登録" %>
-  </div>
-<% end %>
+    <div class="form-group">
+      <%= f.label :password %>
+      <%= f.password_field :password %>
+    </div>
 
-<%= link_to "ログインはこちら", login_path %>
+    <div class="form-group">
+      <%= f.label :password_confirmation %>
+      <%= f.password_field :password_confirmation %>
+    </div>
+
+    <div class="btn-container">
+      <%= f.submit "登録", class: "btn-primary" %>
+    </div>
+  <% end %>
+
+  <%= link_to "ログインはこちら", login_path %>
+</div>

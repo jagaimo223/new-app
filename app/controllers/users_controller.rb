@@ -8,13 +8,14 @@ class UsersController < ApplicationController
     if @user.save
       redirect_to login_path, notice: "ユーザー登録が完了しました！ログインしてください。"
     else
-      render :new
+      flash.now[:alert] = "入力に誤りがあります。"
+      render :new, status: :unprocessable_entity
     end
   end
 
   private
 
   def user_params
-    params.require(:user).permit(:email, :password, :password_confirmation)
+    params.require(:user).permit(:name, :email, :password)
   end
 end

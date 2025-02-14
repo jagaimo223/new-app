@@ -10,42 +10,35 @@
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
     <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-  <header class="header">
-    <div class="container">
-    <h1 class="logo">
-      <%= link_to image_tag("LOGO.png", alt: "Plamo Painter", class: "logo-image"), root_path %>
-    </h1>
-      <nav class="nav-menu">
-        <ul class="nav-links">
-        <% if logged_in? %>
-          <p>こんにちは、<%= current_user.email %> さん！</p>
-          <%= link_to 'ログアウト', logout_path, method: :delete %>
-        <% else %>
-            <%= link_to 'ログイン', login_path %>
-            <%= link_to '新規登録', new_user_path %>
-        <% end %>
-        </ul>
-      </nav>
-    </div>
-  </header>
+  <body class="<%= "#{controller_name}-#{action_name}" %>">
+    <header class="header">
+      <div class="container">
+        <h1 class="logo">
+          <%= link_to image_tag("LOGO.png", alt: "Plamo Painter", class: "logo-image"), root_path %>
+        </h1>
+        <nav class="nav-menu">
+          <ul class="nav-links">
+            <% if logged_in? %>
+              <p>こんにちは、<%= current_user.name %> さん！</p>
+              <%= link_to "ログアウト", logout_path, method: :delete, data: { turbo: false, confirm: "ログアウトしますか？" } %>
+            <% else %>
+              <%= link_to 'ログイン', login_path %>
+              <%= link_to '新規登録', new_user_path %>
+            <% end %>
+          </ul>
+        </nav>
+      </div>
+    </header>
 
-  <!-- メインコンテンツ -->
-  <main class="main-content">
-    <%= yield %>
-  </main>
-
-</body>
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+      <%= yield %>
+    </main>
+  </body>
 </html>
