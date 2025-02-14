@@ -1,11 +1,13 @@
 default: &default
   adapter: mysql2
   encoding: utf8mb4
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  host: db  # 127.0.0.1 ではなく `db` に修正
-  username: root  # ここを環境変数ではなく固定値に変更して試す
-  password: password  # ここも同様
-  database: new_app_development
+  pool: 5
+  database: <%= ENV['DATABASE_URL'] ? URI.parse(ENV['DATABASE_URL']).path.sub("/", "") : "app_production" %>
+  username: <%= ENV['DATABASE_URL'] ? URI.parse(ENV['DATABASE_URL']).user : ENV['DB_USERNAME'] %>
+  password: <%= ENV['DATABASE_URL'] ? URI.parse(ENV['DATABASE_URL']).password : ENV['DB_PASSWORD'] %>
+  host: <%= ENV['DATABASE_URL'] ? URI.parse(ENV['DATABASE_URL']).host : ENV['DB_HOST'] %>
+  port: <%= ENV['DATABASE_URL'] ? URI.parse(ENV['DATABASE_URL']).port : 3306 %>
+  timeout: 5000
 
 development:
   <<: *default
