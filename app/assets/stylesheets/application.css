@@ -233,3 +233,46 @@
 .btn-primary:hover {
   background-color: #011581;
 } 
+
+.container_dash{
+  max-width: 1800px;
+  height: 900px;
+  background: #fff;
+  padding: 50px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  background-color: #f8f9fa;
+  font-family: Arial, sans-serif;
+}
+
+
+
+#imagePreview {
+  display: block;
+  width: 100%;
+  max-width: 1700px;
+  height: 800px;
+  border: 2px solid #ddd;
+}
+
+button {
+  width: 120px;
+  font-weight: bold;
+}
+
+button.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+input[type="file"] {
+  border: 1px solid #ced4da;
+  padding: 5px;
+}
+
+.d-flex.justify-content-around {
+  gap: 10px;
+}

@@ -5,7 +5,7 @@ class SessionsController < ApplicationController
   def create
     @user = login(params[:email], params[:password])
     if @user
-      redirect_to root_path, notice: "ログインしました"
+      redirect_to dashboard_index_path, notice: "ログインしました"
     else
       flash[:alert] = "メールアドレスまたはパスワードが間違っています"
       render :new

@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   root 'pages#home'
 
   resources :users, only: %i[new create]
+  resources :dashboard, only: %i[index]
 
 
   get 'login', to: 'sessions#new'
