@@ -38,3 +38,7 @@ queue:
   <<: *primary
   database: app_production_queue
   migrations_paths: db/queue_migrate
+cable:
+  <<: *primary:
+  database: app_production_cable 
+  migrations_paths: db/cable_migrate
