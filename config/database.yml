@@ -2,6 +2,7 @@ default: &default
   adapter: mysql2
   encoding: utf8mb4
   pool: 5
+
   host: db
   username: root
   password: password
@@ -18,6 +19,7 @@ development:
 test:
   <<: *default
   database: new_app_test
+
   username: root
   password: password
   host: db
