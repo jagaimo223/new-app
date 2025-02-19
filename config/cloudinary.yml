@@ -1,0 +1,11 @@
+development:
+  cloud_name: dko7aevce
+  api_key: 811359184578546
+  api_secret: AOlK7MqfZbegAM14XZe5sqSkc9Y
+  secure: true
+
+production:
+  cloud_name: dko7aevce
+  api_key: 811359184578546
+  api_secret: AOlK7MqfZbegAM14XZe5sqSkc9Y
+  secure: true

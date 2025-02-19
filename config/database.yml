@@ -2,7 +2,7 @@ default: &default
   adapter: mysql2
   encoding: utf8mb4
   pool: 5
-  host: db
+  host: localhost
   username: root
   password: password
   database: new_app_development
@@ -12,7 +12,7 @@ development:
   database: new_app_development  
   username: root
   password: password
-  host: db
+  host: localhost
   port: 3306
 
 test:
@@ -21,7 +21,7 @@ test:
 
   username: root
   password: password
-  host: db
+  host: localhost
   port: 3306
 
 production: &primary
