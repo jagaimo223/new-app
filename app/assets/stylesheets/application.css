@@ -251,12 +251,12 @@ body {
 
 
 #imagePreview {
-  display: block !important;
-  width: auto !important;
-  height: auto !important;
-  min-width: 600px !important;
-  min-height: 600px !important;
-  border: 2px solid #ddd !important;
+  display: block 
+  width: auto ;
+  height: auto;
+  min-width: 600px;
+  min-height: 600px; 
+  border: 2px solid #ddd; 
 }
 
 button {
