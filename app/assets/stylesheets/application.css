@@ -21,16 +21,19 @@
     z-index: 1000;
     border-bottom: 1px solid #ddd;
   }
-  
+
   .logo-image {
     width: 100px;
   }
   
   .nav-menu {
+    max-width: 100%;
+    overflow-x: auto;
     flex-grow: 1;
     display: flex;
     justify-content: flex-end;
   }
+
   
   .nav-links {
     list-style: none;
@@ -41,14 +44,13 @@
   .nav-links a {
     color: #000;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 14px;
     transition: color 0.3s;
   }
   
   .nav-links a:hover {
     color: #f8b400;
   }
-  
 
   .top-container {
     position: relative;
