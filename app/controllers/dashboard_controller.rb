@@ -8,9 +8,7 @@ class DashboardController < ApplicationController
   def upload_images
     @user = current_user
     if params[:images].present?
-      params[:images].each do |image|
-        @user.images.attach(image)
-      end
+      current_user.images.attach(params[:images])
       flash[:notice] = "画像をアップロードしました"
     else
       flash[:alert] = "画像を選択してください"
