@@ -250,34 +250,16 @@ body {
   font-family: Arial, sans-serif;
 }
 
-
-
-#imagePreview {
-  display: block 
-  width: auto ;
+.bordered-canvas {
+  width: 800px;
+  max-width: 100%;
   height: auto;
-  min-width: 600px;
-  min-height: 600px; 
-  border: 2px solid #ddd; 
-}
-
-button {
-  width: 120px;
-  font-weight: bold;
-}
-
-button.btn-outline-secondary:hover {
-  background-color: #6c757d;
-  color: #fff;
-}
-
-input[type="file"] {
-  border: 1px solid #ced4da;
-  padding: 5px;
-}
-
-.d-flex.justify-content-around {
-  gap: 10px;
+  aspect-ratio: 1;
+  border: 5px solid #b1b1b1; 
+  border-radius: 10px; 
+  background-color: #d3d6da; 
+  display: block;
+  margin: 0 auto;
 }
 
 .image-library {
