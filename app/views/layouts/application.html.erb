@@ -28,7 +28,7 @@
               <p>こんにちは、<%= current_user.name %> さん！</p>
               <%= link_to "マイページ","#", class: "nav-link" %>
               <%= link_to "ダッシュボード",dashboard_path, class: "nav-link" %>
-              <%= link_to "ライブラリ", "#", class: "nav-link" %>
+              <%= link_to "ライブラリ",library_index_path, class: "nav-link" %>
               <%= link_to "ログアウト", logout_path, method: :delete, data: { turbo: false, confirm: "ログアウトしますか？" } %>
             <% else %>
               <%= link_to 'ログイン', login_path %>
@@ -39,7 +39,6 @@
       </div>
     </header>
 
-    <!-- メインコンテンツ -->
     <main class="main-content">
       <%= yield %>
     </main>

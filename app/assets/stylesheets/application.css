@@ -250,32 +250,45 @@ body {
   font-family: Arial, sans-serif;
 }
 
-
-
-#imagePreview {
-  display: block 
-  width: auto ;
+.bordered-canvas {
+  width: 800px;
+  max-width: 100%;
   height: auto;
-  min-width: 600px;
-  min-height: 600px; 
-  border: 2px solid #ddd; 
+  aspect-ratio: 1;
+  border: 5px solid #b1b1b1; 
+  border-radius: 10px; 
+  background-color: #d3d6da; 
+  display: block;
+  margin: 0 auto;
 }
 
-button {
-  width: 120px;
-  font-weight: bold;
+.image-library {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
+  padding: 20px;
+  justify-content: center;
 }
 
-button.btn-outline-secondary:hover {
-  background-color: #6c757d;
-  color: #fff;
+.image-container {
+  height: 500px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease-in-out;
+  background: #f8f8f8;
+  padding: 10px;
+  text-align: center;
 }
 
-input[type="file"] {
-  border: 1px solid #ced4da;
-  padding: 5px;
+.image-container:hover {
+  transform: scale(1.05);
 }
 
-.d-flex.justify-content-around {
-  gap: 10px;
+.library-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 10px;
 }

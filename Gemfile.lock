@@ -59,6 +59,7 @@ GEM
       activerecord (= 8.0.1)
       activesupport (= 8.0.1)
       marcel (~> 1.0)
+    activestorage-cloudinary-service (0.2.3)
     activesupport (8.0.1)
       base64
       benchmark (>= 0.3)
@@ -180,6 +181,9 @@ GEM
       net-smtp
     marcel (1.0.4)
     matrix (0.4.2)
+    mini_magick (5.2.0)
+      benchmark
+      logger
     mini_mime (1.1.5)
     minitest (5.25.4)
     msgpack (1.8.0)
@@ -410,6 +414,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  activestorage-cloudinary-service
   bootsnap
   brakeman
   bundler-audit
@@ -420,6 +425,7 @@ DEPENDENCIES
   jbuilder
   kamal
   listen
+  mini_magick
   mysql2 (~> 0.5)
   propshaft
   puma (>= 5.0)

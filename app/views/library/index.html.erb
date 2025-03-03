@@ -1,0 +1,13 @@
+<h1>ライブラリ</h1>
+
+<div class="image-library">
+  <% if @images.any? %> 
+    <% @images.each do |image| %>
+      <div class="image-container">
+        <%= image_tag url_for(image), class: "library-image" %>  <!-- ✅ すべての画像を表示 -->
+      </div>
+    <% end %>
+  <% else %>
+    <p>現在登録されているライブラリ画像はありません。</p>
+  <% end %>
+</div>
