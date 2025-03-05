@@ -46,6 +46,7 @@ gem "cloudinary"
 gem "activestorage-cloudinary-service"
 gem "shrine"
 gem "mini_magick"
+gem "roo"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

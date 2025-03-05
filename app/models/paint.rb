@@ -1,2 +1,0 @@
-class Paint < ApplicationRecord
-end

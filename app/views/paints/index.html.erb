@@ -1,0 +1,23 @@
+<h1>塗料一覧</h1>
+
+<%= form_with url: import_paints_path, multipart: true, method: :post do %>
+  <%= file_field_tag :file %>
+  <%= submit_tag "インポート" %>
+<% end %>
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>名前</th>
+    <th>RGB</th>
+    <th>HEXコード</th>
+  </tr>
+  <% @paints.each do |color| %>
+    <tr>
+      <td><%= color.id %></td>
+      <td><%= color.name %></td>
+      <td><%= color.rgb_value %></td>
+      <td><%= color.hex_code %></td>
+    </tr>
+  <% end %>
+</table>
