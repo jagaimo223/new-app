@@ -5,6 +5,10 @@ Rails.application.routes.draw do
   resources :users, only: %i[new create]
   resources :dashboard, only: %i[index]
   resources :library, only: %i[index]
+  resources :paints, only: %i[index]
+  resources :paints do
+    collection { post :import }
+  end
 
   get 'dashboard', to: 'dashboard#index', as: 'dashboard'
   post 'dashboard/upload_images', to: 'dashboard#upload_images', as: 'upload_images_dashboard'

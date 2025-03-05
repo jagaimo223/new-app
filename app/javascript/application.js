@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   originalImage.onload = function () {
-    canvas.width = originalImage.width / 2; // 適宜サイズ調整
+    canvas.width = originalImage.width / 2; 
     canvas.height = originalImage.height / 2;
     ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
   };
@@ -41,25 +41,22 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // 画像を再描画
     ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
 
-    // HEX → RGB 変換
     const rgb = hexToRgb(hexColor);
     if (!rgb) return;
 
-    // 画像データを取得
+
     let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     let data = imageData.data;
 
-    // ピクセルごとにカラーを変更
+
     for (let i = 0; i < data.length; i += 4) {
       data[i] = (data[i] + rgb.r) / 2; // Red
       data[i + 1] = (data[i + 1] + rgb.g) / 2; // Green
       data[i + 2] = (data[i + 2] + rgb.b) / 2; // Blue
     }
 
-    // 新しい画像を適用
     ctx.putImageData(imageData, 0, 0);
   }
 
