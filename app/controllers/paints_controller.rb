@@ -1,8 +1,9 @@
 class PaintsController < ApplicationController
 require "roo"
+before_action :require_login
 
 def index
-    @paints = Paints.all
+    @paints = Paint.all
 end
 
 
