@@ -26,38 +26,11 @@
 
   <button id="applyColor" class="btn btn-outline-secondary me-2">色を適用</button>
 
-  <%= form_with url: dashboard_path, method: :get, local: true, id: "colorSearchForm", class: "d-flex align-items-center" do %>
+  <form id="colorSearchForm" class="d-flex align-items-center">
     <input type="hidden" name="color" id="colorInput">
     <button type="submit" class="btn btn-secondary">近い色を検索</button>
-  <% end %>
+  </form>
 </div>
 
 
-  <div id="searchResults">
-    <% if @paints.present? %>
-      <div class="mt-4">
-        <h3>検索結果</h3>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>塗料名</th>
-              <th>RGB</th>
-              <th>HEX</th>
-              <th>メーカー</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @paints.each do |paint| %>
-              <tr>
-                <td><%= paint.name %></td>
-                <td><%= paint.rgb_value %></td>
-                <td style="background-color: <%= paint.hex_code %>; color: white;"><%= paint.hex_code %></td>
-                <td><%= paint.maker %></td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    <% end %>
-  </div>
-</div>
+  <div id="searchResults"></div>

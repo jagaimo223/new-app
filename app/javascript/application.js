@@ -12,12 +12,18 @@ document.addEventListener("DOMContentLoaded", function () {
   const applyColorButton = document.getElementById("applyColor");
   const uploadButton = document.getElementById("uploadButton");
   const canvasImage = document.getElementById("canvasImage");
-  const colorInput = document.getElementById("colorInput"); // 二重定義を削除
+  const colorInput = document.getElementById("colorInput");
   const searchForm = document.getElementById("colorSearchForm");
   const selectedHex = document.getElementById("selectedHex");
   const selectedRgb = document.getElementById("selectedRgb");
+  const searchResults = document.getElementById("searchResults");
 
   let originalImage = new Image();
+
+  const savedImage = sessionStorage.getItem("uploadedImage");
+  if (savedImage) {
+    originalImage.src = savedImage;
+  }
 
   if (imageInput) {
     imageInput.addEventListener("change", function (event) {
@@ -26,6 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const reader = new FileReader();
         reader.onload = function (e) {
           originalImage.src = e.target.result;
+          sessionStorage.setItem("uploadedImage", e.target.result); // **Session Storageに保存**
         };
         reader.readAsDataURL(file);
       }
@@ -85,10 +92,10 @@ document.addEventListener("DOMContentLoaded", function () {
   if (colorPicker) {
     colorPicker.addEventListener("input", function () {
       applyColorFilter(colorPicker.value);
-      updateColorDisplay(); // HEXとRGB表示も更新
+      updateColorDisplay();
     });
 
-    updateColorDisplay(); // 初期値を表示
+    updateColorDisplay();
   }
 
   if (applyColorButton) {
@@ -107,11 +114,58 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (searchForm) {
     searchForm.addEventListener("submit", function (event) {
-      updateColorDisplay(); // 送信直前に最新の値をセット
-      if (!colorInput.value || colorInput.value === "()") {
-        event.preventDefault();
-        alert("カラーピッカーで色を選択してください。");
-      }
+      event.preventDefault();
+
+      const formData = new FormData(searchForm);
+      const colorValue = formData.get("color");
+
+      fetch(`/dashboard/search_paints?color=${encodeURIComponent(colorValue)}`)
+        .then(response => response.json())
+        .then(data => {
+          searchResults.innerHTML = ""; 
+          if (data.error) {
+            searchResults.innerHTML = `<p class="text-danger">${data.error}</p>`;
+            return;
+          }
+          if (data.length === 0) {
+            searchResults.innerHTML = "<p>該当する色はありません。</p>";
+            return;
+          }
+
+          let tableHtml = `
+            <div class="mt-4">
+              <h3>検索結果</h3>
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>塗料名</th>
+                    <th>RGB</th>
+                    <th>色</th>
+                    <th>メーカー</th>
+                  </tr>
+                </thead>
+                <tbody>
+          `;
+
+          data.forEach(paint => {
+            tableHtml += `
+              <tr>
+                <td>${paint.name}</td>
+                <td>${paint.rgb_value}</td>
+                <td>
+                  <div style="background-color: ${paint.hex_code}; width: 50px; height: 20px; border: 1px solid #000;"></div>
+                </td>
+                <td>${paint.maker}</td>
+              </tr>
+            `;
+          });
+          tableHtml += "</tbody></table></div>";
+          searchResults.innerHTML = tableHtml;
+        })
+        .catch(error => {
+          console.error("エラー:", error);
+          searchResults.innerHTML = "<p class='text-danger'>エラーが発生しました。</p>";
+        });
     });
   }
 });
