@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const reader = new FileReader();
         reader.onload = function (e) {
           originalImage.src = e.target.result;
-          sessionStorage.setItem("uploadedImage", e.target.result); // **Session Storageに保存**
+          sessionStorage.setItem("uploadedImage", e.target.result);
         };
         reader.readAsDataURL(file);
       }
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (rgb) {
       selectedHex.textContent = hex;
       selectedRgb.textContent = `(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-      colorInput.value = `(${rgb.r}, ${rgb.g}, ${rgb.b})`; // 検索用のhidden inputにもセット
+      colorInput.value = `(${rgb.r}, ${rgb.g}, ${rgb.b})`; 
     }
   }
 
@@ -167,5 +167,22 @@ document.addEventListener("DOMContentLoaded", function () {
           searchResults.innerHTML = "<p class='text-danger'>エラーが発生しました。</p>";
         });
     });
+  }
+});
+
+window.addEventListener("pageshow", function (event) {
+  if (event.persisted && window.location.pathname === "/dashboard") {
+    location.reload();
+  }
+});
+
+document.addEventListener("turbo:load", function () {
+  if (window.location.pathname === "/dashboard") {
+    if (sessionStorage.getItem("reloadDashboard")) {
+      sessionStorage.removeItem("reloadDashboard");
+      location.reload();
+    }
+  } else {
+    sessionStorage.setItem("reloadDashboard", "true");
   }
 });
