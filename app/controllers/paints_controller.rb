@@ -23,7 +23,7 @@ def import
 
         row["rgb_value"] = format_rgb(row["rgb_value"])
 
-        paint = Paints.find_or_initialize_by(name: row["name"])
+        paint = Paint.find_or_initialize_by(name: row["name"])
         paint.rgb_value = row["rgb_value"]
         paint.hex_code = row["hex_code"]
         paint.maker = row["maker"]
