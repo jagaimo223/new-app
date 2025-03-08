@@ -270,7 +270,7 @@ body {
   justify-content: center;
 }
 
-.image-container {
+.image-container-library {
   max-width: 400px;
   max-height: 500px;
   position: relative;
@@ -283,7 +283,7 @@ body {
   text-align: center;
 }
 
-.image-container:hover {
+.image-container-library:hover {
   transform: scale(1.05);
 }
 
