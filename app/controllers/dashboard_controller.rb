@@ -26,17 +26,24 @@ class DashboardController < ApplicationController
     @user = current_user
   
     if params[:canvas_image].present?
-      image_data = params[:canvas_image]
-      image_data = image_data.sub(/^data:image\/png;base64,/, "")
-      file_path = "#{Rails.root}/tmp/uploaded_#{SecureRandom.hex}.png"
+      begin
+        image_data = params[:canvas_image]
+        image_data = image_data.sub(/^data:image\/png;base64,/, "")
+        file = Tempfile.new(["uploaded_", ".png"], binmode: true)
   
-      File.open(file_path, 'wb') do |file|
         file.write(Base64.decode64(image_data))
+        file.rewind
+  
+        @user.images.attach(io: file, filename: "processed_image.png", content_type: "image/png")
+        file.close
+  
+        flash[:notice] = "画像をアップロードしました"
+      rescue => e
+        Rails.logger.error "画像のアップロードエラー: #{e.message}"
+        flash[:alert] = "画像のアップロードに失敗しました"
+      ensure
+        file.unlink if file
       end
-  
-      @user.images.attach(io: File.open(file_path), filename: "processed_image.png", content_type: "image/png")
-  
-      flash[:notice] = "画像をアップロードしました"
     elsif params[:images].present?
       @user.images.attach(params[:images])
       flash[:notice] = "画像をアップロードしました"
@@ -46,6 +53,7 @@ class DashboardController < ApplicationController
   
     redirect_to dashboard_path
   end
+  
 
   private
 

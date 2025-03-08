@@ -3,7 +3,7 @@
 <div class="image-library">
   <% if @images.any? %> 
     <% @images.each do |image| %>
-      <div class="image-container">
+      <div class="image-container-library">
         <%= image_tag url_for(image), class: "library-image" %>
 
         <%= button_to "削除", destroy_image_library_path(image), method: :delete, data: { confirm: "本当に削除しますか？" }, class: "btn btn-danger mt-2" %>
