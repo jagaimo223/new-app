@@ -39,7 +39,36 @@ document.addEventListener("DOMContentLoaded", function () {
         ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
     };
 
-    function applyColorFilter(hexColor) {
+    let isDragging = false;
+    let startX, startY, endX, endY;
+    
+    canvas.addEventListener('mousedown', function (e) {
+        isDragging = true;
+        const rect = canvas.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
+    });
+    
+    canvas.addEventListener('mousemove', function (e) {
+        if (!isDragging) return;
+        const rect = canvas.getBoundingClientRect();
+        endX = e.clientX - rect.left;
+        endY = e.clientY - rect.top;
+
+        ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+    
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(startX, startY, endX - startX, endY - startY);
+    });
+
+    canvas.addEventListener('mouseup', function () {
+        isDragging = false;
+        applyColorFilterToSelection(colorPicker.value);
+    });
+    
+
+    function applyColorFilterToSelection(hexColor) {
         if (!originalImage.src) {
             console.warn("画像が選択されていません");
             return;
@@ -49,6 +78,11 @@ document.addEventListener("DOMContentLoaded", function () {
     
         const rgb = hexToRgb(hexColor);
         if (!rgb) return;
+
+        const rectX = Math.min(startX, endX);
+        const rectY = Math.min(startY, endY);
+        const rectWidth = Math.abs(endX - startX);
+        const rectHeight = Math.abs(endY - startY);
     
         let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         let data = imageData.data;
@@ -60,6 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         ctx.putImageData(imageData, 0, 0);
+        canvasImage.value = canvas.toDataURL('image/png');
     }
     
     function hexToRgb(hex) {
@@ -163,3 +198,4 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
