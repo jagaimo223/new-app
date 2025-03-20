@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById("imageCanvas");
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     const colorPicker = document.getElementById("colorPickerImage"); 
-    const applyColorButton = document.getElementById("applyColor");
+    const applyColorButton = document.getElementById("applyColorButton");
     const uploadButton = document.getElementById("uploadButton");
     const canvasImage = document.getElementById("canvasImage");
     const colorInput = document.getElementById("colorInput");
@@ -13,6 +13,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchResults = document.getElementById("searchResults");
   
     let originalImage = new Image();
+    let isDragging = false;
+    let selectionActive = false;
+    let startX, startY, endX, endY;
+    let tempImageData = null;
+    
+
   
     const userImageUrl = document.getElementById("userImageUrl");
     if (userImageUrl && userImageUrl.value) {
@@ -39,62 +45,107 @@ document.addEventListener("DOMContentLoaded", function () {
         ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
     };
 
-    let isDragging = false;
-    let startX, startY, endX, endY;
-    
     canvas.addEventListener('mousedown', function (e) {
         isDragging = true;
+        selectionActive = false; 
         const rect = canvas.getBoundingClientRect();
-        startX = e.clientX - rect.left;
-        startY = e.clientY - rect.top;
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        startX = (e.clientX - rect.left) * scaleX;
+        startY = (e.clientY - rect.top) * scaleY;
+
+        tempImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     });
-    
+
     canvas.addEventListener('mousemove', function (e) {
         if (!isDragging) return;
-        const rect = canvas.getBoundingClientRect();
-        endX = e.clientX - rect.left;
-        endY = e.clientY - rect.top;
 
-        ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-    
-        ctx.strokeStyle = 'red';
-        ctx.lineWidth = 2;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        endX = (e.clientX - rect.left) * scaleX;
+        endY = (e.clientY - rect.top) * scaleY;
+
+
+        ctx.putImageData(tempImageData, 0, 0);
+        ctx.strokeStyle = "rgba(255, 255, 255, 1)";
+        ctx.lineWidth = 1;
         ctx.strokeRect(startX, startY, endX - startX, endY - startY);
     });
 
-    canvas.addEventListener('mouseup', function () {
+    document.addEventListener('mouseup', function () {
+        if (isDragging ){
         isDragging = false;
-        applyColorFilterToSelection(colorPicker.value);
-    });
-    
+        selectionActive = true; 
+        }
 
-    function applyColorFilterToSelection(hexColor) {
+        if (Math.abs(endX - startX) < 2 || Math.abs(endY - startY) < 2) {
+            console.warn("選択範囲が小さすぎます");
+            selectionActive = false;
+        }
+    });
+
+    canvas.addEventListener('mouseleave', function () {
+        if (isDragging){
+            isDragging =false;
+            selectionActive =false;
+        }
+    });
+
+
+    applyColorButton.addEventListener("click", function () {
+        if (!selectionActive) {
+            console.warn("適用する範囲が選択されていません");
+            return;
+        }
+        applyColorFilter(colorPicker.value, startX, startY, endX, endY);
+        selectionActive = false;
+
+    });
+
+    function applyColorFilter(hexColor, x1, y1, x2, y2) {
         if (!originalImage.src) {
             console.warn("画像が選択されていません");
             return;
         }
-    
-        ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-    
+
         const rgb = hexToRgb(hexColor);
         if (!rgb) return;
 
-        const rectX = Math.min(startX, endX);
-        const rectY = Math.min(startY, endY);
-        const rectWidth = Math.abs(endX - startX);
-        const rectHeight = Math.abs(endY - startY);
-    
-        let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let data = imageData.data;
-    
-        for (let i = 0; i < data.length; i += 4) {
-            data[i] = (data[i] + rgb.r) / 2; // Red
-            data[i + 1] = (data[i + 1] + rgb.g) / 2; // Green
-            data[i + 2] = (data[i + 2] + rgb.b) / 2; // Blue
+
+        let left = Math.min(x1, x2);
+        let top = Math.min(y1, y2);
+        let width = Math.abs(x2 - x1);
+        let height = Math.abs(y2 - y1);
+
+        if (isNaN(left) || isNaN(top) || isNaN(width) || isNaN(height)) {
+            console.error("無効な選択範囲:", { left, top, width, height });
+            return;
         }
-    
-        ctx.putImageData(imageData, 0, 0);
-        canvasImage.value = canvas.toDataURL('image/png');
+
+        if (width === 0 || height === 0) {
+            console.warn("選択範囲が無効 (幅または高さが0)");
+            return;
+        }
+
+        try {
+            let imageData = ctx.getImageData(left, top, width, height);
+            let data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = (data[i] + rgb.r) / 2;
+                data[i + 1] = (data[i + 1] + rgb.g) / 2;
+                data[i + 2] = (data[i + 2] + rgb.b) / 2;
+            }
+
+            ctx.putImageData(imageData, left, top);
+            tempImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            canvasImage.value = canvas.toDataURL('image/png');
+        } catch (error) {
+            console.error("getImageData の実行中にエラーが発生:", error);
+        }
     }
     
     function hexToRgb(hex) {
@@ -120,27 +171,19 @@ document.addEventListener("DOMContentLoaded", function () {
   
     if (colorPicker) {
         colorPicker.addEventListener("input", function () {
-            applyColorFilter(colorPicker.value);
             updateColorDisplay();
         });
     
-        updateColorDisplay();
+
     }
-  
-    if (applyColorButton) {
-        applyColorButton.addEventListener("click", function () {
-            applyColorFilter(colorPicker.value);
-            updateColorDisplay();
-        });
-    }
-  
+
     if (uploadButton) {
         uploadButton.addEventListener("click", function () {
             canvasImage.value = canvas.toDataURL("image/png"); 
             uploadButton.closest("form").submit();
         });
     }
-  
+
     if (searchForm) {
         searchForm.addEventListener("submit", function (event) {
             event.preventDefault();
