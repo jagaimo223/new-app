@@ -13,8 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchResults = document.getElementById("searchResults");
   
     let originalImage = new Image();
-    let isDragging = false;
-    let selectionActive = false;
+    let isDrawing = false;
+    let selectionPath = [];
+    let selectionPaths = [];
     let startX, startY, endX, endY;
     let tempImageData = null;
     
@@ -46,108 +47,107 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     canvas.addEventListener('mousedown', function (e) {
-        isDragging = true;
-        selectionActive = false; 
+        isDrawing = true;
+        selectionPath = []; 
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
-        startX = (e.clientX - rect.left) * scaleX;
-        startY = (e.clientY - rect.top) * scaleY;
+        let x = (e.clientX - rect.left) * scaleX;
+        let y = (e.clientY - rect.top) * scaleY;
 
         tempImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     });
 
     canvas.addEventListener('mousemove', function (e) {
-        if (!isDragging) return;
+        if (!isDrawing) return;
 
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
-        endX = (e.clientX - rect.left) * scaleX;
-        endY = (e.clientY - rect.top) * scaleY;
+        let x = (e.clientX - rect.left) * scaleX;
+        let y = (e.clientY - rect.top) * scaleY;
+        selectionPath.push({ x, y });
 
 
         ctx.putImageData(tempImageData, 0, 0);
-        ctx.strokeStyle = "rgba(255, 255, 255, 1)";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(startX, startY, endX - startX, endY - startY);
+        ctx.beginPath();
+        ctx.moveTo(selectionPath[0].x, selectionPath[0].y);
+
+        for (let i = 1; i < selectionPath.length; i++) {
+            ctx.lineTo(selectionPath[i].x, selectionPath[i].y);
+        }
+
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"; 
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
     });
 
     document.addEventListener('mouseup', function () {
-        if (isDragging ){
-        isDragging = false;
-        selectionActive = true; 
+        if (isDrawing && selectionPath.length > 0) {
+            selectionPaths.push([...selectionPath]);
         }
-
-        if (Math.abs(endX - startX) < 2 || Math.abs(endY - startY) < 2) {
-            console.warn("選択範囲が小さすぎます");
-            selectionActive = false;
-        }
-    });
-
-    canvas.addEventListener('mouseleave', function () {
-        if (isDragging){
-            isDragging =false;
-            selectionActive =false;
-        }
+        isDrawing = false;
+        ctx.setLineDash([]);
     });
 
 
     applyColorButton.addEventListener("click", function () {
-        if (!selectionActive) {
+        if (selectionPath.length === 0) { 
             console.warn("適用する範囲が選択されていません");
             return;
         }
-        applyColorFilter(colorPicker.value, startX, startY, endX, endY);
-        selectionActive = false;
-
+        applyColorFilter(colorPicker.value);
     });
 
-    function applyColorFilter(hexColor, x1, y1, x2, y2) {
+    document.addEventListener("DOMContentLoaded", function () {
+        const clearSelectionButton = document.getElementById("clearSelectionButton");
+        if (clearSelectionButton) {
+            clearSelectionButton.addEventListener("click", function () {
+                selectionPaths = [];
+                ctx.putImageData(tempImageData, 0, 0); // 画像を復元
+            });
+        }
+    });
+    
+
+    function applyColorFilter(hexColor) {
         if (!originalImage.src) {
             console.warn("画像が選択されていません");
             return;
         }
-
+    
         const rgb = hexToRgb(hexColor);
         if (!rgb) return;
-
-
-        let left = Math.min(x1, x2);
-        let top = Math.min(y1, y2);
-        let width = Math.abs(x2 - x1);
-        let height = Math.abs(y2 - y1);
-
-        if (isNaN(left) || isNaN(top) || isNaN(width) || isNaN(height)) {
-            console.error("無効な選択範囲:", { left, top, width, height });
-            return;
-        }
-
-        if (width === 0 || height === 0) {
-            console.warn("選択範囲が無効 (幅または高さが0)");
-            return;
-        }
-
-        try {
-            let imageData = ctx.getImageData(left, top, width, height);
-            let data = imageData.data;
-
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = (data[i] + rgb.r) / 2;
-                data[i + 1] = (data[i + 1] + rgb.g) / 2;
-                data[i + 2] = (data[i + 2] + rgb.b) / 2;
-            }
-
-            ctx.putImageData(imageData, left, top);
-            tempImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            canvasImage.value = canvas.toDataURL('image/png');
-        } catch (error) {
-            console.error("getImageData の実行中にエラーが発生:", error);
-        }
-    }
     
+        ctx.putImageData(tempImageData, 0, 0);
+        let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let data = imageData.data;
+    
+        selectionPaths.forEach(path => {
+            ctx.beginPath();
+            ctx.moveTo(path[0].x, path[0].y);
+            path.forEach(point => ctx.lineTo(point.x, point.y));
+            ctx.closePath();
+    
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
+                    if (ctx.isPointInPath(x, y)) {
+                        let index = (y * canvas.width + x) * 4;
+                        data[index] = (data[index] + rgb.r) / 2; // Red
+                        data[index + 1] = (data[index + 1] + rgb.g) / 2; // Green
+                        data[index + 2] = (data[index + 2] + rgb.b) / 2; // Blue
+                    }
+                }
+            }
+        });
+    
+        ctx.putImageData(imageData, 0, 0);
+        canvasImage.value = canvas.toDataURL('image/png');
+    }
+
     function hexToRgb(hex) {
         if (!hex || hex.length !== 7) return null;
         const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
