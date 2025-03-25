@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById("imageCanvas");
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     const colorPicker = document.getElementById("colorPickerImage"); 
-    const applyColorButton = document.getElementById("applyColor");
+    const applyColorButton = document.getElementById("applyColorButton");
     const uploadButton = document.getElementById("uploadButton");
     const canvasImage = document.getElementById("canvasImage");
     const colorInput = document.getElementById("colorInput");
@@ -13,6 +13,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchResults = document.getElementById("searchResults");
   
     let originalImage = new Image();
+    let isDrawing = false;
+    let selectionPath = [];
+    let selectionPaths = [];
+    let startX, startY, endX, endY;
+    let tempImageData = null;
+    
+
   
     const userImageUrl = document.getElementById("userImageUrl");
     if (userImageUrl && userImageUrl.value) {
@@ -39,29 +46,108 @@ document.addEventListener("DOMContentLoaded", function () {
         ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
     };
 
+    canvas.addEventListener('mousedown', function (e) {
+        isDrawing = true;
+        selectionPath = []; 
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        let x = (e.clientX - rect.left) * scaleX;
+        let y = (e.clientY - rect.top) * scaleY;
+
+        tempImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    });
+
+    canvas.addEventListener('mousemove', function (e) {
+        if (!isDrawing) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        let x = (e.clientX - rect.left) * scaleX;
+        let y = (e.clientY - rect.top) * scaleY;
+        selectionPath.push({ x, y });
+
+
+        ctx.putImageData(tempImageData, 0, 0);
+        ctx.beginPath();
+        ctx.moveTo(selectionPath[0].x, selectionPath[0].y);
+
+        for (let i = 1; i < selectionPath.length; i++) {
+            ctx.lineTo(selectionPath[i].x, selectionPath[i].y);
+        }
+
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)"; 
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+    });
+
+    document.addEventListener('mouseup', function () {
+        if (isDrawing && selectionPath.length > 0) {
+            selectionPaths.push([...selectionPath]);
+        }
+        isDrawing = false;
+        ctx.setLineDash([]);
+    });
+
+
+    applyColorButton.addEventListener("click", function () {
+        if (selectionPath.length === 0) { 
+            console.warn("適用する範囲が選択されていません");
+            return;
+        }
+        applyColorFilter(colorPicker.value);
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const clearSelectionButton = document.getElementById("clearSelectionButton");
+        if (clearSelectionButton) {
+            clearSelectionButton.addEventListener("click", function () {
+                selectionPaths = [];
+                ctx.putImageData(tempImageData, 0, 0); // 画像を復元
+            });
+        }
+    });
+    
+
     function applyColorFilter(hexColor) {
         if (!originalImage.src) {
             console.warn("画像が選択されていません");
             return;
         }
     
-        ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-    
         const rgb = hexToRgb(hexColor);
         if (!rgb) return;
     
+        ctx.putImageData(tempImageData, 0, 0);
         let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         let data = imageData.data;
     
-        for (let i = 0; i < data.length; i += 4) {
-            data[i] = (data[i] + rgb.r) / 2; // Red
-            data[i + 1] = (data[i + 1] + rgb.g) / 2; // Green
-            data[i + 2] = (data[i + 2] + rgb.b) / 2; // Blue
-        }
+        selectionPaths.forEach(path => {
+            ctx.beginPath();
+            ctx.moveTo(path[0].x, path[0].y);
+            path.forEach(point => ctx.lineTo(point.x, point.y));
+            ctx.closePath();
+    
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
+                    if (ctx.isPointInPath(x, y)) {
+                        let index = (y * canvas.width + x) * 4;
+                        data[index] = (data[index] + rgb.r) / 2; // Red
+                        data[index + 1] = (data[index + 1] + rgb.g) / 2; // Green
+                        data[index + 2] = (data[index + 2] + rgb.b) / 2; // Blue
+                    }
+                }
+            }
+        });
     
         ctx.putImageData(imageData, 0, 0);
+        canvasImage.value = canvas.toDataURL('image/png');
     }
-    
+
     function hexToRgb(hex) {
         if (!hex || hex.length !== 7) return null;
         const match = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
@@ -85,27 +171,19 @@ document.addEventListener("DOMContentLoaded", function () {
   
     if (colorPicker) {
         colorPicker.addEventListener("input", function () {
-            applyColorFilter(colorPicker.value);
             updateColorDisplay();
         });
     
-        updateColorDisplay();
+
     }
-  
-    if (applyColorButton) {
-        applyColorButton.addEventListener("click", function () {
-            applyColorFilter(colorPicker.value);
-            updateColorDisplay();
-        });
-    }
-  
+
     if (uploadButton) {
         uploadButton.addEventListener("click", function () {
             canvasImage.value = canvas.toDataURL("image/png"); 
             uploadButton.closest("form").submit();
         });
     }
-  
+
     if (searchForm) {
         searchForm.addEventListener("submit", function (event) {
             event.preventDefault();
@@ -163,3 +241,4 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
