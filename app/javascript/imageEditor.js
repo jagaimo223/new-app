@@ -1,3 +1,7 @@
+export function initializeEditor() {
+    console.log("画像エディターが初期化されました");
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const imageInput = document.getElementById("imageInput");
     const canvas = document.getElementById("imageCanvas");
@@ -18,9 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let selectionPaths = [];
     let startX, startY, endX, endY;
     let tempImageData = null;
-    
 
-  
     const userImageUrl = document.getElementById("userImageUrl");
     if (userImageUrl && userImageUrl.value) {
         originalImage.src = userImageUrl.value;
@@ -44,23 +46,100 @@ document.addEventListener("DOMContentLoaded", function () {
         canvas.width = originalImage.width / 2;
         canvas.height = originalImage.height / 2;
         ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+
+        const mat = cv.imread(canvas);
+        mat.delete();
     };
 
+    function detectEdgesInSelection() {
+        const sx = Math.min(edgeStartX, edgeEndX);
+        const sy = Math.min(edgeStartY, edgeEndY);
+        const w = Math.abs(edgeEndX - edgeStartX);
+        const h = Math.abs(edgeEndY - edgeStartY);
+    
+        if (w === 0 || h === 0) return;
+
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = w;
+        tempCanvas.height = h;
+        const tempCtx = tempCanvas.getContext("2d");
+        const selectedImageData = ctx.getImageData(sx, sy, w, h);
+        tempCtx.putImageData(selectedImageData, 0, 0);
+
+        const src =cv.imread(tempCanvas);
+        const gray = new cv.Mat();
+        const edges = new cv.Mat();
+        const rgba = new cv.Mat();
+    
+        cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+        cv.Canny(gray, edges, 50, 150);
+        cv.cvtColor(edges, rgba, cv.COLOR_GRAY2RGBA);
+    
+        const resultImageData = new ImageData(new Uint8ClampedArray(rgba.data), rgba.cols, rgba.rows);
+        ctx.putImageData(resultImageData, sx, sy);
+    
+        const mask = [];
+        for (let y = 0; y < edges.rows; y++) {
+            for (let x = 0; x < edges.cols; x++) {
+                const index = y * edges.cols + x;
+                if (edges.data[index] > 200) {
+                    mask.push({ x: x + sx, y: y + sy }); 
+                }
+            }
+        }
+        selectionPaths.push(mask);
+    
+        src.delete(); gray.delete(); edges.delete(); rgba.delete();
+    }
+    
+
+    function toggleModeButtons(activeMode) {
+        const manualBtn = document.getElementById("manualModeBtn");
+        const autoBtn = document.getElementById("autoEdgeModeBtn");
+    
+        if (!manualBtn || !autoBtn) return;
+    
+        manualBtn.classList.toggle("active", activeMode === "manual");
+        autoBtn.classList.toggle("active", activeMode === "auto");
+    }
+    
+
+    let maskMode = "manual";
+    let edgeSelecting = false;
+    let edgeStartX, edgeStartY, edgeEndX, edgeEndY;
+
+    document.getElementById("manualModeBtn").addEventListener("click",() => {
+        maskMode = "manual";
+        toggleModeButtons("manual");
+    });
+
+    document.getElementById("autoEdgeModeBtn").addEventListener("click", () => {
+        maskMode ="auto";
+        toggleModeButtons("auto");
+    });
+
     canvas.addEventListener('mousedown', function (e) {
-        isDrawing = true;
-        selectionPath = []; 
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-
+    
         let x = (e.clientX - rect.left) * scaleX;
         let y = (e.clientY - rect.top) * scaleY;
-
-        tempImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
+        if (maskMode === "manual") {
+            isDrawing = true;
+            selectionPath = [{ x, y }];
+            tempImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        } else if (maskMode === "auto") {
+            edgeSelecting = true;
+            edgeStartX = x;
+            edgeStartY = y;
+            tempImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
     });
 
     canvas.addEventListener('mousemove', function (e) {
-        if (!isDrawing) return;
+        if (maskMode !== "manual" || !isDrawing) return;
 
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
@@ -85,13 +164,27 @@ document.addEventListener("DOMContentLoaded", function () {
         ctx.stroke();
     });
 
-    document.addEventListener('mouseup', function () {
-        if (isDrawing && selectionPath.length > 0) {
+    canvas.addEventListener('mouseup', function (e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+    
+        let x = (e.clientX - rect.left) * scaleX;
+        let y = (e.clientY - rect.top) * scaleY;
+    
+        if (maskMode === "manual" && isDrawing) {
+            isDrawing = false;
             selectionPaths.push([...selectionPath]);
+            ctx.setLineDash([]);
+        } else if (maskMode === "auto" && edgeSelecting) {
+            edgeSelecting = false;
+            edgeEndX = x;
+            edgeEndY = y;
+    
+            detectEdgesInSelection(); 
         }
-        isDrawing = false;
-        ctx.setLineDash([]);
     });
+    
 
 
     applyColorButton.addEventListener("click", function () {

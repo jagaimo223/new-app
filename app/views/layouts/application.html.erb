@@ -13,7 +13,31 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
 
+    <script>
+      window.Module = {
+        wasmBinaryFile: '/opencv/opencv_js.wasm'
+      };
+    </script>
+    <script src="/opencv/opencv.js"></script>
+
     <%= javascript_importmap_tags %>
+    <script>
+      function waitForOpenCV(callback) {
+        const check = () => {
+          if (typeof cv !== "undefined" && typeof cv.Mat !== "undefined") {
+            callback();
+          } else {
+          setTimeout(check, 200);
+          }
+        };
+        check();
+      }
+
+      waitForOpenCV(() => {
+        import("imageEditor").then((m) => m.initializeEditor());
+      });
+    </script>
+
   </head>
 
   <body class="<%= "#{controller_name}-#{action_name}" %>">
