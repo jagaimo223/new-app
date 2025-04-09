@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    originalImage.src = e.target.result;
+                   originalImage.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             }
@@ -58,38 +58,72 @@ document.addEventListener("DOMContentLoaded", function () {
         const h = Math.abs(edgeEndY - edgeStartY);
     
         if (w === 0 || h === 0) return;
-
+    
         const tempCanvas = document.createElement("canvas");
         tempCanvas.width = w;
         tempCanvas.height = h;
         const tempCtx = tempCanvas.getContext("2d");
         const selectedImageData = ctx.getImageData(sx, sy, w, h);
         tempCtx.putImageData(selectedImageData, 0, 0);
-
-        const src =cv.imread(tempCanvas);
+    
+        const src = cv.imread(tempCanvas);
         const gray = new cv.Mat();
-        const edges = new cv.Mat();
+        const blurred = new cv.Mat();
+        const thresh = new cv.Mat();
         const rgba = new cv.Mat();
     
+
         cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-        cv.Canny(gray, edges, 50, 150);
-        cv.cvtColor(edges, rgba, cv.COLOR_GRAY2RGBA);
-    
+        cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
+        cv.adaptiveThreshold(
+            gray, thresh,
+            255,
+            cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv.THRESH_BINARY,
+            13, 4
+          );
+        cv.cvtColor(thresh, rgba, cv.COLOR_GRAY2RGBA);
         const resultImageData = new ImageData(new Uint8ClampedArray(rgba.data), rgba.cols, rgba.rows);
         ctx.putImageData(resultImageData, sx, sy);
     
-        const mask = [];
-        for (let y = 0; y < edges.rows; y++) {
-            for (let x = 0; x < edges.cols; x++) {
-                const index = y * edges.cols + x;
-                if (edges.data[index] > 200) {
-                    mask.push({ x: x + sx, y: y + sy }); 
-                }
-            }
-        }
-        selectionPaths.push(mask);
+        const contours = new cv.MatVector();
+        const hierarchy = new cv.Mat();
+        cv.findContours(thresh, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
     
-        src.delete(); gray.delete(); edges.delete(); rgba.delete();
+        for (let i = 0; i < contours.size(); i++) {
+            const contour = contours.get(i);
+            const area = cv.contourArea(contour);
+            if (area > 500 && area < canvas.width * canvas.height * 0.9) {
+                contour.delete();
+                continue;
+            }
+
+            const mask = [];
+            for (let j = 0; j < contour.data32S.length; j += 2) {
+                const x = contour.data32S[j];
+                const y = contour.data32S[j + 1];
+                mask.push({ x: x + sx, y: y + sy });
+            }
+    
+            if (mask.length > 2) {
+                selectionPaths.push(mask);
+    
+                mask.forEach(point => {
+                    ctx.fillStyle = "rgba(228, 12, 12, 0.5)";
+                    ctx.fillRect(point.x, point.y, 1, 1);
+                });
+            }
+    
+            contour.delete();
+        }
+    
+        contours.delete();
+        hierarchy.delete();
+        src.delete();
+        gray.delete();
+        blurred.delete();
+        thresh.delete();
+        rgba.delete();
     }
     
 
@@ -188,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     applyColorButton.addEventListener("click", function () {
-        if (selectionPath.length === 0) { 
+        if (!selectionPaths || selectionPaths.length === 0) {
             console.warn("適用する範囲が選択されていません");
             return;
         }
@@ -200,12 +234,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (clearSelectionButton) {
             clearSelectionButton.addEventListener("click", function () {
                 selectionPaths = [];
-                ctx.putImageData(tempImageData, 0, 0); // 画像を復元
+                ctx.putImageData(tempImageData, 0, 0);
             });
         }
     });
     
-
     function applyColorFilter(hexColor) {
         if (!originalImage.src) {
             console.warn("画像が選択されていません");
@@ -213,32 +246,41 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     
         const rgb = hexToRgb(hexColor);
-        if (!rgb) return;
+        if (!rgb || selectionPaths.length === 0) return;
     
         ctx.putImageData(tempImageData, 0, 0);
-        let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let data = imageData.data;
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
     
         selectionPaths.forEach(path => {
-            ctx.beginPath();
-            ctx.moveTo(path[0].x, path[0].y);
-            path.forEach(point => ctx.lineTo(point.x, point.y));
-            ctx.closePath();
+            if (path.length > 2) {
+                const path2D = new Path2D();
+                path2D.moveTo(path[0].x, path[0].y);
+                path.forEach(p => path2D.lineTo(p.x, p.y));
+                path2D.closePath();
     
-            for (let y = 0; y < canvas.height; y++) {
-                for (let x = 0; x < canvas.width; x++) {
-                    if (ctx.isPointInPath(x, y)) {
-                        let index = (y * canvas.width + x) * 4;
-                        data[index] = (data[index] + rgb.r) / 2; // Red
-                        data[index + 1] = (data[index + 1] + rgb.g) / 2; // Green
-                        data[index + 2] = (data[index + 2] + rgb.b) / 2; // Blue
+                const minX = Math.floor(Math.min(...path.map(p => p.x)));
+                const maxX = Math.ceil(Math.max(...path.map(p => p.x)));
+                const minY = Math.floor(Math.min(...path.map(p => p.y)));
+                const maxY = Math.ceil(Math.max(...path.map(p => p.y)));
+    
+                for (let y = minY; y <= maxY; y++) {
+                    for (let x = minX; x <= maxX; x++) {
+                        if (ctx.isPointInPath(path2D, x, y)) {
+                            const index = (y * canvas.width + x) * 4;
+                            if (index >= 0 && index + 2 < data.length) {
+                                data[index] = (data[index] + rgb.r) / 2;
+                                data[index + 1] = (data[index + 1] + rgb.g) / 2;
+                                data[index + 2] = (data[index + 2] + rgb.b) / 2;
+                            }
+                        }
                     }
                 }
             }
         });
     
         ctx.putImageData(imageData, 0, 0);
-        canvasImage.value = canvas.toDataURL('image/png');
+        canvasImage.value = canvas.toDataURL("image/png");
     }
 
     function hexToRgb(hex) {
