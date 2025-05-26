@@ -73,5 +73,5 @@ end
 
 ruby "3.2.2"
 
-gem "rspec-rails", "~> 7.1"
+gem "rspec-rails", "~> 8.0"
 gem 'bundler-audit'
