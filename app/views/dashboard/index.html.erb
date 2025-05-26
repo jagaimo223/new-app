@@ -13,6 +13,11 @@
       <button type="button" id="uploadButton" class="btn btn-success px-5">アップロード</button>
       <%= f.hidden_field :canvas_image, id: "canvasImage" %> <!-- Canvasデータを送信 -->
     </div>
+    <div class="btn-group" role="group" aria-label="Mask Mode">
+      <button id="manualModeBtn" type="button" class="btn btn-outline-primary active">手動選択</button>
+      <button id="autoEdgeModeBtn" type="button" class="btn btn-outline-secondary">自動エッジ</button>
+    </div>
+
   <% end %>
 
   <br>
