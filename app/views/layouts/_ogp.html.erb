@@ -1,0 +1,10 @@
+<meta property="og:title" content="<%= content_for?(:og_title) ? yield(:og_title) : 'デフォルトのタイトル' %>" />
+<meta property="og:description" content="<%= content_for?(:og_description) ? yield(:og_description) : 'デフォルトの説明文' %>" />
+<meta property="og:image" content="<%= content_for?(:og_image) ? yield(:og_image) : image_url('LOGO.png') %>" />
+<meta property="og:url" content="<%= request.original_url %>" />
+<meta property="og:type" content="website" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="<%= content_for?(:og_title) ? yield(:og_title) : 'デフォルトのタイトル' %>" />
+<meta name="twitter:description" content="<%= content_for?(:og_description) ? yield(:og_description) : 'デフォルトの説明文' %>" />
+<meta name="twitter:image" content="<%= content_for?(:og_image) ? yield(:og_image) : image_url('LOGO.png') %>" />
