@@ -8,7 +8,12 @@
   border: 8px solid #007bff;
   box-sizing: border-box;
 ">
-<img src="https://plamo-painter-a60b75e8dc61.herokuapp.com/top.jpg"
+<%
+  image_path = Rails.root.join('public/top.jpg')
+  base64_image = Base64.strict_encode64(File.read(image_path))
+%>
+
+<img src="data:image/jpeg;base64,<%= base64_image %>"
     style="
     position: absolute;
     top: 0; left: 0;

@@ -1,3 +1,5 @@
+require "base64"
+
 class OgpController < ApplicationController
   def generate
     html = render_to_string(partial: 'ogp_template', locals: { title: params[:title] })
