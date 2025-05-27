@@ -5,7 +5,7 @@
 
 <meta charset="utf-8">
 <div style="
-  width: 1210px;
+  width: 1220px;
   height: 610px;
   position: relative;
   overflow: hidden;
@@ -14,9 +14,10 @@
   box-sizing: border-box;
 ">
 
-  <img src="<%= request.base_url + image_path('top.jpg') %>" style="
+  <img src="data:image/jpeg;base64,<%= base64_image %>" style="
       position: absolute;
-      top: -5%; left: -5%;
+      top: -5%;
+      left: -5%;
       width: 110%;
       height: 110%;
       object-fit: cover;
