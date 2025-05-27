@@ -5,14 +5,23 @@
 
 <meta charset="utf-8">
 <div style="
-  width: 1200px;
-  height: 630px;
+  width: 1210px;
+  height: 610px;
   position: relative;
   overflow: hidden;
   font-family: sans-serif;
   border: 8px solid #007bff;
   box-sizing: border-box;
 ">
+
+  <img src="<%= request.base_url + image_path('top.jpg') %>" style="
+      position: absolute;
+      top: -5%; left: -5%;
+      width: 110%;
+      height: 110%;
+      object-fit: cover;
+      z-index: 0;
+    ">
 
   <div style="
     position: relative;
