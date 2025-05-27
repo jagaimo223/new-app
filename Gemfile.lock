@@ -481,6 +481,7 @@ DEPENDENCIES
   propshaft
   puma (>= 5.0)
   rails (~> 8.0.2)
+  rexml
   roo
   rspec-rails (~> 8.0)
   rubocop-rails-omakase
