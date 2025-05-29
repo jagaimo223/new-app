@@ -80,6 +80,8 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
   config.active_storage.service = :cloudinary
 
+  config.hosts << "www.plamopainter.com"
+
 
   # Enable DNS rebinding protection and other `Host` header attacks.
   # config.hosts = [
